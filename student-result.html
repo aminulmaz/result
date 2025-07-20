@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>School Result Portal</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Inter Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- jsPDF CDN for PDF generation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.14/jspdf.plugin.autotable.min.js"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            /* Improved background design */
+            background: linear-gradient(to right bottom, #6a0dad, #007bff); /* Purple to Blue Gradient */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 1rem;
+        }
+        .container {
+            max-width: 800px;
+            width: 100%;
+            background-color: rgba(255, 255, 255, 0.95); /* Slightly transparent white */
+            backdrop-filter: blur(5px); /* Frosted glass effect */
+        }
+        /* Custom modal styles for alerts */
+        .modal {
+            display: none; /* Hidden by default */
+            position: fixed; /* Stay in place */
+            z-index: 1000; /* Sit on top */
+            left: 0;
+            top: 0;
+            width: 100%; /* Full width */
+            height: 100%; /* Full height */
+            overflow: auto; /* Enable scroll if needed */
+            background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-content {
+            background-color: #fefefe;
+            margin: auto;
+            padding: 20px;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            width: 80%;
+            max-width: 400px;
+            text-align: center;
+        }
+        .close-button {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+        .close-button:hover,
+        .close-button:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="container bg-white p-8 rounded-xl shadow-lg">
+        <h1 class="text-3xl font-bold text-center text-gray-800 mb-8">School Result Portal</h1>
+
+        <!-- Input Section -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+            <div>
+                <label for="classSelect" class="block text-gray-700 text-sm font-medium mb-2">Select Class:</label>
+                <select id="classSelect" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <option value="">-- Loading Classes --</option>
+                </select>
+            </div>
+            <div>
+                <label for="rollNumberInput" class="block text-gray-700 text-sm font-medium mb-2">Roll Number:</label>
+                <input type="text" id="rollNumberInput" placeholder="Enter Roll Number" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+        </div>
+
+        <button id="searchResultBtn" class="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition duration-300 shadow-md">
+            Search Result
+        </button>
+
+        <!-- Loading Indicator -->
+        <div id="loadingIndicator" class="hidden text-center mt-6">
+            <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 inline-block"></div>
+            <p class="text-gray-600 mt-2">Fetching results...</p>
+        </div>
+
+        <!-- Message/Error Display -->
+        <div id="messageDisplay" class="hidden mt-6 p-3 rounded-lg text-center text-sm"></div>
+
+        <!-- Result Display Section -->
+        <div id="resultDisplay" class="hidden mt-8 bg-gray-50 p-6 rounded-lg shadow-inner">
+            <h2 class="text-2xl font-bold text-gray-800 mb-4">Student Result</h2>
+            <p class="text-lg mb-2"><span class="font-semibold">Name:</span> <span id="studentName"></span></p>
+            <p class="text-lg mb-4"><span class="font-semibold">Roll Number:</span> <span id="displayRollNumber"></span></p>
+
+            <div class="overflow-x-auto">
+                <table class="min-w-full bg-white rounded-lg shadow-md">
+                    <thead>
+                        <tr class="bg-blue-100 text-blue-800 uppercase text-sm leading-normal">
+                            <th class="py-3 px-6 text-left rounded-tl-lg">Subject</th>
+                            <th class="py-3 px-6 text-left rounded-tr-lg">Marks</th>
+                        </tr>
+                    </thead>
+                    <tbody id="subjectMarksTableBody" class="text-gray-700 text-sm font-light">
+                        <!-- Subject marks will be injected here -->
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="mt-6 text-right text-xl font-bold text-gray-800">
+                Total Marks: <span id="totalMarks"></span>
+            </div>
+            <div class="mt-2 text-right text-xl font-bold text-gray-800">
+                Grade: <span id="grade"></span>
+            </div>
+
+            <button id="downloadPdfBtn" class="w-full mt-8 bg-green-600 text-white py-3 rounded-lg font-semibold hover:bg-green-700 transition duration-300 shadow-md">
+                Download Result as PDF
+            </button>
+        </div>
+    </div>
+
+    <!-- Custom Modal for Messages -->
+    <div id="customModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button">&times;</span>
+            <p id="modalMessage" class="text-lg text-gray-800"></p>
+            <button id="modalCloseButton" class="mt-4 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition duration-300">OK</button>
+        </div>
+    </div>
+
+    <script type="module">
+        // Firebase imports
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc, collection, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Your actual Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyCgufqQyVE01Di_2jzF_n641TGm8RMMisM",
+            authDomain: "mzrresult.firebaseapp.com",
+            projectId: "mzrresult",
+            storageBucket: "mzrresult.firebasestorage.app",
+            messagingSenderId: "953622456593",
+            appId: "1:953622456593:web:abf64d8f3da57f57a304b0",
+            measurementId: "G-K33NJ5HJBH"
+        };
+
+        // Extract appId directly from firebaseConfig
+        const appId = firebaseConfig.appId;
+        // initialAuthToken is not used for email/password auth, so it can be removed or set to null
+        const initialAuthToken = null;
+
+        let app, db, auth;
+        let userId = null; // To store the authenticated user ID
+        let isAuthReady = false; // Flag to indicate if authentication is complete
+
+        // Get DOM elements
+        const classSelect = document.getElementById('classSelect');
+        const rollNumberInput = document.getElementById('rollNumberInput');
+        const searchResultBtn = document.getElementById('searchResultBtn');
+        const loadingIndicator = document.getElementById('loadingIndicator');
+        const messageDisplay = document.getElementById('messageDisplay');
+        const resultDisplay = document.getElementById('resultDisplay');
+        const studentNameSpan = document.getElementById('studentName');
+        const displayRollNumberSpan = document.getElementById('displayRollNumber');
+        const subjectMarksTableBody = document.getElementById('subjectMarksTableBody');
+        const totalMarksSpan = document.getElementById('totalMarks');
+        const gradeSpan = document.getElementById('grade');
+        const downloadPdfBtn = document.getElementById('downloadPdfBtn');
+
+        // Custom Modal elements
+        const customModal = document.getElementById('customModal');
+        const modalMessage = document.getElementById('modalMessage');
+        const closeButton = document.querySelector('.close-button');
+        const modalCloseButton = document.getElementById('modalCloseButton');
+
+        /**
+         * Displays a custom modal message instead of alert().
+         * @param {string} message The message to display.
+         * @param {string} type The type of message (e.g., 'error', 'success').
+         */
+        function showCustomModal(message, type = 'info') {
+            modalMessage.textContent = message;
+            customModal.style.display = 'flex'; // Use flex to center the modal content
+
+            if (type === 'error') {
+                modalMessage.style.color = '#dc2626'; // Red
+            } else if (type === 'success') {
+                modalMessage.style.color = '#16a34a'; // Green
+            } else {
+                modalMessage.style.color = '#4b5563'; // Gray
+            }
+        }
+
+        // Close modal event listeners
+        closeButton.onclick = function() {
+            customModal.style.display = 'none';
+        }
+        modalCloseButton.onclick = function() {
+            customModal.style.display = 'none';
+        }
+        window.onclick = function(event) {
+            if (event.target == customModal) {
+                customModal.style.display = 'none';
+            }
+        }
+
+        /**
+         * Initializes Firebase and authenticates the user.
+         */
+        async function initializeFirebase() {
+            try {
+                if (!firebaseConfig || Object.keys(firebaseConfig).length === 0) {
+                    console.error("Firebase config is missing or empty. Please ensure firebaseConfig is provided.");
+                    showCustomModal("Firebase is not configured. Please contact support.", "error");
+                    return;
+                }
+                app = initializeApp(firebaseConfig);
+                db = getFirestore(app);
+                auth = getAuth(app);
+
+                // Listen for auth state changes
+                onAuthStateChanged(auth, async (user) => {
+                    if (user) {
+                        userId = user.uid;
+                        console.log("Firebase authenticated as user:", userId);
+                        isAuthReady = true;
+                        await loadClasses(); // Load classes once authenticated
+                    } else {
+                        // Sign in anonymously if no token is provided or user is not signed in
+                        // For a public facing portal, anonymous sign-in is common for read access.
+                        await signInAnonymously(auth);
+                    }
+                });
+
+            } catch (error) {
+                console.error("Error initializing Firebase:", error);
+                showCustomModal("Failed to initialize Firebase. " + error.message, "error");
+            }
+        }
+
+        /**
+         * Loads classes dynamically from Firestore and populates the dropdown.
+         */
+        async function loadClasses() {
+            if (!isAuthReady || !db) {
+                console.warn("Firebase not ready for loading classes.");
+                return;
+            }
+
+            classSelect.innerHTML = '<option value="">-- Loading Classes --</option>'; // Reset and show loading
+            try {
+                const classesCollectionRef = collection(db, `artifacts/${appId}/public/data/classes`);
+                const querySnapshot = await getDocs(classesCollectionRef);
+
+                if (querySnapshot.empty) {
+                    classSelect.innerHTML = '<option value="">-- No Classes Found --</option>';
+                    return;
+                }
+
+                let optionsHtml = '<option value="">-- Select Class --</option>';
+                querySnapshot.forEach(doc => {
+                    const classData = doc.data();
+                    // Assuming class documents have a 'name' field, or use doc.id directly
+                    const className = classData.name || doc.id;
+                    optionsHtml += `<option value="${doc.id}">${className}</option>`;
+                });
+                classSelect.innerHTML = optionsHtml;
+
+            } catch (error) {
+                console.error("Error loading classes:", error);
+                showCustomModal("Failed to load classes. Please try again later.", "error");
+                classSelect.innerHTML = '<option value="">-- Error Loading Classes --</option>';
+            }
+        }
+
+        /**
+         * Displays a message to the user.
+         * @param {string} message The message to display.
+         * @param {string} type The type of message ('success', 'error', 'info').
+         */
+        function displayMessage(message, type = 'info') {
+            messageDisplay.textContent = message;
+            messageDisplay.classList.remove('hidden', 'bg-red-100', 'text-red-800', 'bg-green-100', 'text-green-800', 'bg-blue-100', 'text-blue-800');
+            if (type === 'error') {
+                messageDisplay.classList.add('bg-red-100', 'text-red-800');
+            } else if (type === 'success') {
+                messageDisplay.classList.add('bg-green-100', 'text-green-800');
+            } else {
+                messageDisplay.classList.add('bg-blue-100', 'text-blue-800');
+            }
+            messageDisplay.classList.remove('hidden');
+        }
+
+        /**
+         * Hides the message display.
+         */
+        function hideMessage() {
+            messageDisplay.classList.add('hidden');
+        }
+
+        /**
+         * Fetches and displays the student's result.
+         */
+        async function searchResult() {
+            hideMessage();
+            resultDisplay.classList.add('hidden');
+            downloadPdfBtn.classList.add('hidden');
+            loadingIndicator.classList.remove('hidden');
+
+            const selectedClassId = classSelect.value; // Now using doc.id as value
+            const selectedClassName = classSelect.options[classSelect.selectedIndex].text; // Get display name
+            const rollNumber = rollNumberInput.value.trim();
+
+            if (!selectedClassId) {
+                showCustomModal("Please select a class.", "error");
+                loadingIndicator.classList.add('hidden');
+                return;
+            }
+            if (!rollNumber) {
+                showCustomModal("Please enter a roll number.", "error");
+                loadingIndicator.classList.add('hidden');
+                return;
+            }
+
+            if (!isAuthReady || !db) {
+                showCustomModal("Firebase is not ready. Please wait a moment and try again.", "error");
+                loadingIndicator.classList.add('hidden');
+                return;
+            }
+
+            try {
+                // Construct the path to the student's result document
+                const resultDocRef = doc(db, `artifacts/${appId}/public/data/classes/${selectedClassId}/students`, rollNumber);
+                const resultDocSnap = await getDoc(resultDocRef);
+
+                if (resultDocSnap.exists()) {
+                    const studentData = resultDocSnap.data();
+                    studentNameSpan.textContent = studentData.studentName || 'N/A';
+                    displayRollNumberSpan.textContent = rollNumber;
+                    totalMarksSpan.textContent = studentData.totalMarks || 'N/A';
+                    gradeSpan.textContent = studentData.grade || 'N/A';
+
+                    // Clear previous subject marks
+                    subjectMarksTableBody.innerHTML = '';
+
+                    // Populate subject marks table
+                    if (studentData.subjects && Array.isArray(studentData.subjects)) {
+                        studentData.subjects.forEach(subject => {
+                            const row = document.createElement('tr');
+                            row.classList.add('border-b', 'border-gray-200', 'hover:bg-gray-100');
+                            row.innerHTML = `
+                                <td class="py-3 px-6 text-left whitespace-nowrap">${subject.name || 'N/A'}</td>
+                                <td class="py-3 px-6 text-left">${subject.marks || 'N/A'}</td>
+                            `;
+                            subjectMarksTableBody.appendChild(row);
+                        });
+                    } else {
+                        subjectMarksTableBody.innerHTML = `<tr><td colspan="2" class="py-3 px-6 text-center text-gray-500">No subject data available.</td></tr>`;
+                    }
+
+                    resultDisplay.classList.remove('hidden');
+                    downloadPdfBtn.classList.remove('hidden');
+                    displayMessage("Result found!", "success");
+                } else {
+                    displayMessage("No result found for the given Class and Roll Number. Please check your input.", "error");
+                    resultDisplay.classList.add('hidden');
+                    downloadPdfBtn.classList.add('hidden');
+                }
+            } catch (error) {
+                console.error("Error fetching document:", error);
+                showCustomModal("An error occurred while fetching the result: " + error.message, "error");
+                resultDisplay.classList.add('hidden');
+                downloadPdfBtn.classList.add('hidden');
+            } finally {
+                loadingIndicator.classList.add('hidden');
+            }
+        }
+
+        /**
+         * Generates and downloads the PDF of the result.
+         */
+        async function downloadPdf() {
+            // Ensure jsPDF and autoTable are loaded
+            if (typeof window.jspdf === 'undefined' || typeof window.jspdf.jsPDF === 'undefined' || typeof window.jspdf.autoTable === 'undefined') {
+                showCustomModal("PDF library not loaded correctly. Please try again or refresh the page.", "error");
+                return;
+            }
+
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+
+            const studentName = studentNameSpan.textContent;
+            const rollNumber = displayRollNumberSpan.textContent;
+            const totalMarks = totalMarksSpan.textContent;
+            const grade = gradeSpan.textContent;
+            const selectedClassName = classSelect.options[classSelect.selectedIndex].text; // Get display name
+
+            // Add title
+            doc.setFontSize(22);
+            doc.text("School Result Card", 105, 20, null, null, "center");
+
+            // Add student details
+            doc.setFontSize(14);
+            doc.text(`Name: ${studentName}`, 20, 40);
+            doc.text(`Class: ${selectedClassName}`, 20, 50);
+            doc.text(`Roll Number: ${rollNumber}`, 20, 60);
+
+            // Add subject marks table
+            const tableColumn = ["Subject", "Marks"];
+            const tableRows = [];
+
+            const rows = subjectMarksTableBody.querySelectorAll('tr');
+            rows.forEach(row => {
+                const cells = row.querySelectorAll('td');
+                if (cells.length === 2) {
+                    tableRows.push([cells[0].textContent, cells[1].textContent]);
+                }
+            });
+
+            doc.autoTable({
+                head: [tableColumn],
+                body: tableRows,
+                startY: 75,
+                theme: 'grid',
+                headStyles: { fillColor: [37, 99, 235], textColor: [255, 255, 255], fontStyle: 'bold' }, // Blue-600
+                styles: { fontSize: 12, cellPadding: 3 },
+                columnStyles: {
+                    0: { cellWidth: 'auto' },
+                    1: { cellWidth: 30, halign: 'center' }
+                }
+            });
+
+            // Get the final Y position after the table
+            const finalY = doc.autoTable.previous.finalY;
+
+            // Add total marks and grade
+            doc.setFontSize(16);
+            doc.text(`Total Marks: ${totalMarks}`, 20, finalY + 20);
+            doc.text(`Grade: ${grade}`, 20, finalY + 30);
+
+            // Add a footer
+            doc.setFontSize(10);
+            doc.setTextColor(150);
+            doc.text("Generated by School Result Portal", 105, doc.internal.pageSize.height - 10, null, null, "center");
+
+            doc.save(`Result_${selectedClassName}_${rollNumber}.pdf`);
+        }
+
+        // Event Listeners
+        searchResultBtn.addEventListener('click', searchResult);
+        downloadPdfBtn.addEventListener('click', downloadPdf);
+
+        // Initialize Firebase on window load
+        window.onload = initializeFirebase;
+    </script>
+</body>
+</html>
