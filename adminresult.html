@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en" class="">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin | Result Management</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f0f4f8; }
+        .dark body { background-color: #0f172a; }
+    </style>
+</head>
+<body class="transition-all">
+    <div class="min-h-screen flex flex-col items-center justify-center p-4">
+        
+        <!-- Login View -->
+        <div id="login-view" class="w-full max-w-md">
+            <div class="bg-white dark:bg-gray-800 shadow-xl rounded-2xl p-8">
+                <h2 class="text-2xl font-bold text-center text-gray-800 dark:text-white mb-6">Admin Login</h2>
+                <div class="space-y-4">
+                    <div>
+                        <label for="email" class="text-sm font-medium text-gray-700 dark:text-gray-300">Email</label>
+                        <input type="email" id="email" class="mt-1 block w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="admin@school.com">
+                    </div>
+                    <div>
+                        <label for="password" class="text-sm font-medium text-gray-700 dark:text-gray-300">Password</label>
+                        <input type="password" id="password" class="mt-1 block w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="••••••••">
+                    </div>
+                    <button id="login-btn" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-lg">Sign In</button>
+                    <p id="login-error" class="text-sm text-red-500 text-center"></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Admin Dashboard View -->
+        <div id="admin-dashboard" class="hidden w-full max-w-4xl">
+            <div class="bg-white dark:bg-gray-800 shadow-xl rounded-2xl">
+                <div class="p-6 border-b dark:border-gray-700 flex justify-between items-center">
+                    <h2 class="text-2xl font-bold text-gray-800 dark:text-white">Result Management Dashboard</h2>
+                    <button id="logout-btn" class="text-sm font-medium text-indigo-600 hover:text-indigo-500 dark:text-indigo-400">Logout</button>
+                </div>
+                <div class="p-8">
+                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- Add/Edit Result Form -->
+                        <div class="space-y-4">
+                             <h3 class="text-lg font-semibold text-gray-700 dark:text-gray-200">Add/Update Student Result</h3>
+                            <div>
+                                <label for="admin-class-select" class="text-sm font-medium">Class</label>
+                                <select id="admin-class-select" class="mt-1 block w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg"></select>
+                            </div>
+                            <div>
+                                <label for="student-name" class="text-sm font-medium">Student Name</label>
+                                <input type="text" id="student-name" class="mt-1 block w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 rounded-lg border border-gray-300 dark:border-gray-600" placeholder="John Doe">
+                            </div>
+                            <div>
+                                <label for="student-roll" class="text-sm font-medium">Roll Number</label>
+                                <input type="text" id="student-roll" class="mt-1 block w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 rounded-lg border border-gray-300 dark:border-gray-600" placeholder="SA-001">
+                            </div>
+                             <div id="subjects-container" class="space-y-3 pt-2">
+                                <!-- Subject fields will be dynamically added here -->
+                            </div>
+                            <button id="save-result-btn" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-lg">Save Result</button>
+                        </div>
+                        <!-- Manage Classes/Subjects -->
+                        <div class="space-y-6">
+                            <div>
+                                <h3 class="text-lg font-semibold text-gray-700 dark:text-gray-200">Manage Classes</h3>
+                                <div class="flex gap-2 mt-2">
+                                    <input type="text" id="new-class-name" placeholder="New Class Name (e.g., Class 10)" class="flex-grow px-4 py-2 bg-gray-50 dark:bg-gray-700 rounded-lg border border-gray-300 dark:border-gray-600">
+                                    <button id="add-class-btn" class="bg-blue-600 text-white px-4 py-2 rounded-lg">+</button>
+                                </div>
+                                <ul id="class-list" class="mt-2 space-y-1 text-sm"></ul>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-semibold text-gray-700 dark:text-gray-200">Manage Subjects for Selected Class</h3>
+                                <div class="flex gap-2 mt-2">
+                                    <input type="text" id="new-subject-name" placeholder="New Subject Name" class="flex-grow px-4 py-2 bg-gray-50 dark:bg-gray-700 rounded-lg border border-gray-300 dark:border-gray-600">
+                                    <button id="add-subject-btn" class="bg-blue-600 text-white px-4 py-2 rounded-lg">+</button>
+                                </div>
+                                 <ul id="subject-list" class="mt-2 space-y-1 text-sm"></ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                 <div id="status-message" class="px-8 pb-4"></div>
+            </div>
+        </div>
+    </div>
+    
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+        import { getFirestore, doc, setDoc, getDoc, collection, getDocs, updateDoc, arrayUnion, arrayRemove } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+        import { firebaseConfig } from './firebaseconfig.js';
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // --- DOM ELEMENTS ---
+        const loginView = document.getElementById('login-view');
+        const adminDashboard = document.getElementById('admin-dashboard');
+        const loginBtn = document.getElementById('login-btn');
+        const logoutBtn = document.getElementById('logout-btn');
+        const emailInput = document.getElementById('email');
+        const passwordInput = document.getElementById('password');
+        const loginError = document.getElementById('login-error');
+        const adminClassSelect = document.getElementById('admin-class-select');
+        const subjectsContainer = document.getElementById('subjects-container');
+        const saveResultBtn = document.getElementById('save-result-btn');
+        const addClassBtn = document.getElementById('add-class-btn');
+        const newClassNameInput = document.getElementById('new-class-name');
+        const addSubjectBtn = document.getElementById('add-subject-btn');
+        const newSubjectNameInput = document.getElementById('new-subject-name');
+        const classList = document.getElementById('class-list');
+        const subjectList = document.getElementById('subject-list');
+        const statusMessage = document.getElementById('status-message');
+
+
+        // --- AUTHENTICATION ---
+        onAuthStateChanged(auth, user => {
+            if (user) {
+                loginView.classList.add('hidden');
+                adminDashboard.classList.remove('hidden');
+                loadAdminData();
+            } else {
+                loginView.classList.remove('hidden');
+                adminDashboard.classList.add('hidden');
+            }
+        });
+
+        loginBtn.addEventListener('click', () => {
+            const email = emailInput.value;
+            const password = passwordInput.value;
+            signInWithEmailAndPassword(auth, email, password)
+                .catch(error => {
+                    loginError.textContent = error.message;
+                });
+        });
+
+        logoutBtn.addEventListener('click', () => signOut(auth));
+
+        // --- DATA MANAGEMENT ---
+        
+        async function loadAdminData() {
+            await populateClassesForAdmin();
+            if(adminClassSelect.value) {
+                await loadSubjectsForClass(adminClassSelect.value);
+            }
+        }
+        
+        async function populateClassesForAdmin() {
+            const classesSnapshot = await getDocs(collection(db, "classes"));
+            adminClassSelect.innerHTML = '<option value="">-- Select a Class --</option>';
+            classList.innerHTML = '';
+            classesSnapshot.forEach(doc => {
+                const option = document.createElement('option');
+                option.value = doc.id;
+                option.textContent = doc.data().name;
+                adminClassSelect.appendChild(option);
+
+                const li = document.createElement('li');
+                li.className = 'flex justify-between items-center p-2 bg-gray-100 dark:bg-gray-700 rounded';
+                li.textContent = doc.data().name;
+                classList.appendChild(li);
+            });
+        }
+        
+        adminClassSelect.addEventListener('change', (e) => {
+            if (e.target.value) {
+                loadSubjectsForClass(e.target.value);
+            } else {
+                subjectsContainer.innerHTML = '';
+                subjectList.innerHTML = '';
+            }
+        });
+        
+        async function loadSubjectsForClass(classId) {
+            subjectsContainer.innerHTML = '';
+            subjectList.innerHTML = '';
+            const classDoc = await getDoc(doc(db, "classes", classId));
+            if (classDoc.exists() && classDoc.data().subjects) {
+                classDoc.data().subjects.forEach(subject => {
+                    addSubjectField(subject);
+                    addSubjectToList(subject, classId);
+                });
+            }
+        }
+
+        function addSubjectField(subjectName) {
+            const subjectDiv = document.createElement('div');
+            subjectDiv.className = 'grid grid-cols-5 gap-2 items-center';
+            subjectDiv.innerHTML = `
+                <label class="col-span-2 text-sm">${subjectName}</label>
+                <input type="number" data-subject="${subjectName}" data-type="theory" placeholder="Theory" class="col-span-1 text-center bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded">
+                <input type="number" data-subject="${subjectName}" data-type="practical" placeholder="Practical" class="col-span-1 text-center bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded">
+            `;
+            subjectsContainer.appendChild(subjectDiv);
+        }
+        
+        function addSubjectToList(subjectName, classId) {
+             const li = document.createElement('li');
+             li.className = 'flex justify-between items-center p-2 bg-gray-100 dark:bg-gray-700 rounded';
+             li.textContent = subjectName;
+             const removeBtn = document.createElement('button');
+             removeBtn.textContent = 'x';
+             removeBtn.className = 'text-red-500 font-bold';
+             removeBtn.onclick = () => removeSubject(subjectName, classId);
+             li.appendChild(removeBtn);
+             subjectList.appendChild(li);
+        }
+
+        addClassBtn.addEventListener('click', async () => {
+            const className = newClassNameInput.value.trim();
+            if (className) {
+                const classId = className.toLowerCase().replace(/\s+/g, '-');
+                await setDoc(doc(db, "classes", classId), { name: className, subjects: [] });
+                newClassNameInput.value = '';
+                await populateClassesForAdmin();
+                displayStatus("Class added successfully!", "green");
+            }
+        });
+
+        addSubjectBtn.addEventListener('click', async () => {
+            const subjectName = newSubjectNameInput.value.trim();
+            const classId = adminClassSelect.value;
+            if (subjectName && classId) {
+                await updateDoc(doc(db, "classes", classId), {
+                    subjects: arrayUnion(subjectName)
+                });
+                newSubjectNameInput.value = '';
+                await loadSubjectsForClass(classId);
+                displayStatus("Subject added successfully!", "green");
+            }
+        });
+
+        async function removeSubject(subjectName, classId){
+             if (confirm(`Are you sure you want to remove ${subjectName}?`)) {
+                await updateDoc(doc(db, "classes", classId), {
+                    subjects: arrayRemove(subjectName)
+                });
+                await loadSubjectsForClass(classId);
+                displayStatus("Subject removed successfully!", "green");
+            }
+        }
+
+        saveResultBtn.addEventListener('click', async () => {
+            const classId = adminClassSelect.value;
+            const studentName = document.getElementById('student-name').value.trim();
+            const studentRoll = document.getElementById('student-roll').value.trim().toUpperCase();
+
+            if (!classId || !studentName || !studentRoll) {
+                displayStatus("Please fill all student details.", "red");
+                return;
+            }
+
+            const subjects = {};
+            const subjectInputs = subjectsContainer.querySelectorAll('input[type="number"]');
+            subjectInputs.forEach(input => {
+                const subject = input.dataset.subject;
+                const type = input.dataset.type;
+                if (!subjects[subject]) subjects[subject] = {};
+                subjects[subject][type] = input.value || 0;
+            });
+            
+            try {
+                await setDoc(doc(db, "results", classId, "students", studentRoll), {
+                    name: studentName,
+                    subjects: subjects
+                });
+                displayStatus("Result saved successfully!", "green");
+                // Clear fields
+                document.getElementById('student-name').value = '';
+                document.getElementById('student-roll').value = '';
+                subjectInputs.forEach(input => input.value = '');
+
+            } catch (error) {
+                console.error("Error saving result: ", error);
+                displayStatus("Error saving result. Check console.", "red");
+            }
+        });
+        
+        function displayStatus(message, color) {
+            statusMessage.innerHTML = `<p class="text-sm text-${color}-500">${message}</p>`;
+            setTimeout(() => statusMessage.innerHTML = '', 3000);
+        }
+
+    </script>
+</body>
+</html>
