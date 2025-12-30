@@ -1,36 +1,152 @@
+:root {
+    --red: #d32f2f;
+    --dark-blue: #0a1929;
+    --yellow: #ffeb3b;
+    --bg-gray: #e0e0e0;
+}
+
 body {
     margin: 0;
-    font-family: 'Oswald', sans-serif;
-    /* This replicates the brick/wall texture */
-    background-color: #e5e5e5;
-    background-image: url('https://www.transparenttextures.com/patterns/brick-wall.png');
-    color: #1a1a1a;
+    padding: 0;
+    background-color: var(--bg-gray);
+    /* Adding a brick/concrete texture effect */
+    background-image: url('https://www.transparenttextures.com/patterns/brick-wall-light.png');
+    font-family: 'Roboto Condensed', sans-serif;
+    display: flex;
+    justify-content: center;
+}
+
+.container {
+    width: 100%;
+    max-width: 450px; /* Mobile-first width like the screenshot */
     text-align: center;
+    padding-bottom: 50px;
 }
 
-.hero {
-    padding: 50px 20px;
-    background: linear-gradient(to bottom, rgba(255,255,255,0.8), transparent);
-}
-
-h1 {
+.main-title {
+    font-family: 'Bebas Neue', cursive;
     font-size: 2.5rem;
-    letter-spacing: 1px;
-    margin-bottom: 5px;
+    color: #1a1a1a;
+    margin: 40px 0 20px;
+    line-height: 1;
+}
+
+/* News Card Styles */
+.news-card {
+    background: white;
+    width: 85%;
+    margin: 0 auto;
+    border: 3px solid var(--dark-blue);
+    border-radius: 12px;
+    position: relative;
+    box-shadow: 12px 12px 0px rgba(0,0,0,0.1);
+    overflow: hidden;
+}
+
+.red-banner {
+    background: var(--red);
+    color: white;
+    padding: 10px;
+    font-family: 'Bebas Neue', cursive;
+    font-size: 1.8rem;
+    letter-spacing: 2px;
+    /* Grunge brush effect simulation */
+    clip-path: polygon(0% 0%, 100% 0%, 95% 100%, 5% 100%);
+}
+
+.card-inner {
+    padding: 20px;
+    background: url('https://www.transparenttextures.com/patterns/paper-fibers.png');
+}
+
+.news-logo {
+    background: #0077b6;
+    color: white;
+    display: inline-block;
+    padding: 5px 15px;
+    margin-bottom: 15px;
+    font-weight: bold;
+}
+
+.assamese-text {
+    font-size: 1.2rem;
+    font-weight: 900;
+    color: #111;
+    margin-bottom: 15px;
+}
+
+.card-footer-tag {
+    background: var(--dark-blue);
+    color: white;
+    padding: 10px;
+    font-family: 'Bebas Neue', cursive;
+    font-size: 1.5rem;
+}
+
+.card-footer-tag span {
+    color: var(--yellow);
+}
+
+/* Counter Styles */
+.pledge-section {
+    margin-top: 50px;
+    background: url('https://www.transparenttextures.com/patterns/dark-matter.png');
+    padding: 30px 10px;
+    color: white;
 }
 
 .counter-box {
     background: #000;
-    color: #fff;
-    display: inline-block;
-    padding: 20px 40px;
-    border-radius: 15px;
     border: 4px solid #333;
-    margin-top: 30px;
+    display: inline-block;
+    padding: 10px 40px;
+    border-radius: 10px;
+    box-shadow: inset 0 0 10px #444;
 }
 
 .counter-number {
+    font-family: 'Bebas Neue', cursive;
     font-size: 4rem;
-    border-bottom: 2px solid #444;
-    margin-bottom: 10px;
+    letter-spacing: 4px;
+}
+
+.pledge-text {
+    font-size: 1.2rem;
+    font-weight: bold;
+    margin-top: 10px;
+}
+
+.hash-tag {
+    background: var(--red);
+    display: inline-block;
+    padding: 5px 15px;
+    margin-top: 10px;
+    font-weight: bold;
+}
+
+/* Navigation Arrows */
+.nav-arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: var(--dark-blue);
+    color: white;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    line-height: 40px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.left { left: -20px; }
+.right { right: -20px; }
+
+.job-scam-tag {
+    background: var(--red);
+    color: white;
+    font-family: 'Bebas Neue';
+    font-size: 2rem;
+    width: 60%;
+    margin: 0 auto;
 }
